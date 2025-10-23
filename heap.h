@@ -2,112 +2,101 @@
 #define HEAP_H
 #include <functional>
 #include <stdexcept>
+#include <vector>
+#include <algorithm>
 
 template <typename T, typename PComparator = std::less<T> >
 class Heap
 {
 public:
-  /**
-   * @brief Construct a new Heap object
-   * 
-   * @param m ary-ness of heap tree (default to 2)
-   * @param c binary predicate function/functor that takes two items
-   *          as an argument and returns a bool if the first argument has
-   *          priority over the second.
-   */
-  Heap(int m=2, PComparator c = PComparator());
+  
+  Heap(int m=2, PComparator c = PComparator())
+    : m_(m), comp_(c) {}
 
-  /**
-  * @brief Destroy the Heap object
-  * 
-  */
-  ~Heap();
+  
+  ~Heap(){}
 
-  /**
-   * @brief Push an item to the heap
-   * 
-   * @param item item to heap
-   */
-  void push(const T& item);
+  
+  void push(const T& item){
+    data_.push_back(item);
+    trickleUp((int)data_.size() - 1);
+  }
 
-  /**
-   * @brief Returns the top (priority) item
-   * 
-   * @return T const& top priority item
-   * @throw std::underflow_error if the heap is empty
-   */
-  T const & top() const;
 
-  /**
-   * @brief Remove the top priority item
-   * 
-   * @throw std::underflow_error if the heap is empty
-   */
-  void pop();
+  
+  T const & top() const{
+    if (empty()){
+      throw std::underflow_error("head is empty");
+    }
+    return data_.front();
+  }
 
-  /// returns true if the heap is empty
+  
+  void pop(){
+    if(empty()){
+      throw std::underflow_error("heap is empty");
+    }
+    std::swap(data_.front(),data_.back());
+    data_.pop_back();
+    if(!data_.empty())
+    {
+      trickleDown(0);
+    }
+  }
 
-  /**
-   * @brief Returns true if the heap is empty
-   * 
-   */
-  bool empty() const;
+  
+  bool empty() const{
+    return data_.empty();
+  }
 
-    /**
-   * @brief Returns size of the heap
-   * 
-   */
-  size_t size() const;
+  size_t size() const{
+    return data_.size();
+  }
 
 private:
-  /// Add whatever helper functions and data members you need below
+
+  std::vector<T> data_;
+  int m_;
+  PComparator comp_;
 
 
 
+  void trickleUp(int idx){
+    while(idx > 0){
+      int parent = (idx - 1) / m_;
+      if(comp_(data_[idx], data_[parent])){
+        std::swap(data_[idx], data_[parent]);
+        idx = parent;
+      }
+      else{
+        break;
+      }
+    }
+  }
+
+
+  void trickleDown(int idx){
+  while(true)
+  {
+    int best = idx;
+    for(int k = 1; k <=m_; ++k){
+      int child = m_ * idx + k;
+      if(child < (int)data_.size() && comp_(data_[child], data_[best]))
+      {
+        best = child;
+      }
+    }
+    if(best == idx)
+      break;
+    
+    std::swap(data_[idx], data_[best]);
+    idx = best;
+  }
+}
 
 };
 
-// Add implementation of member functions here
 
-
-// We will start top() for you to handle the case of 
-// calling top on an empty heap
-template <typename T, typename PComparator>
-T const & Heap<T,PComparator>::top() const
-{
-  // Here we use exceptions to handle the case of trying
-  // to access the top element of an empty heap
-  if(empty()){
-    // ================================
-    // throw the appropriate exception
-    // ================================
-
-
-  }
-  // If we get here we know the heap has at least 1 item
-  // Add code to return the top element
-
-
-
-}
-
-
-// We will start pop() for you to handle the case of 
-// calling top on an empty heap
-template <typename T, typename PComparator>
-void Heap<T,PComparator>::pop()
-{
-  if(empty()){
-    // ================================
-    // throw the appropriate exception
-    // ================================
-
-
-  }
-
-
-
-}
 
 
 
